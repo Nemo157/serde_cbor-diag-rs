@@ -17,9 +17,11 @@ cbor2diag! {
     u64_max(b"1bffffffffffffffff" => "18446744073709551615")
 
     // u128 is not supported by serde_cbor::Value
+    //
     // u64_max_plus_one(b"c249010000000000000000" => "18446744073709551616")
 
     // TODO: Broken, don't know where exactly
+    //
     // neg_u64_max(b"3bffffffffffffffff" => "-18446744073709551616")
 
     neg_one(b"20" => "-1")
@@ -61,10 +63,12 @@ cbor2diag! {
     bool_true(b"f5" => "true")
 
     // TODO serde_cbor::Value's handling of bare null and undefined seems off
+    //
     // null(b"f6" => "null")
     // undefined(b"f7" => "undefined")
 
     // serde_cbor::Value doesn't support unassigned simple values
+    //
     // simple_sixteen(b"f0" => "simple(16)")
     // simple_twenty_fourc(b"f818" => "simple(24)")
     // simple_two_hundred_fifty_five(b"f8ff" => "simple(255)")
@@ -99,7 +103,7 @@ cbor2diag! {
     array_large(
         b"98190102030405060708090a0b0c0d0e0f101112131415161718181819"
         => "[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, \
-              19, 20, 21, 22, 23, 24, 25]")
+             19, 20, 21, 22, 23, 24, 25]")
 
     map_empty(b"a0" => "{ }")
     map_integers(b"a201020304" => "{ 1: 2, 3: 4 }")
@@ -108,35 +112,40 @@ cbor2diag! {
     map_strings(
         b"a56161614161626142616361436164614461656145"
         => r#"{ "a": "A", "b": "B", "c": "C", "d": "D", "e": "E" }"#)
-}
 
-// Tests left to add:
-//
-// +------------------------------+------------------------------------+
-// | Diagnostic                   | Encoded                            |
-// |                              |                                    |
-// | (_ h'0102', h'030405')       | 0x5f42010243030405ff               |
-// |                              |                                    |
-// | (_ "strea", "ming")          | 0x7f657374726561646d696e67ff       |
-// |                              |                                    |
-// | [_ ]                         | 0x9fff                             |
-// |                              |                                    |
-// | [_ 1, [2, 3], [_ 4, 5]]      | 0x9f018202039f0405ffff             |
-// |                              |                                    |
-// | [_ 1, [2, 3], [4, 5]]        | 0x9f01820203820405ff               |
-// |                              |                                    |
-// | [1, [2, 3], [_ 4, 5]]        | 0x83018202039f0405ff               |
-// |                              |                                    |
-// | [1, [_ 2, 3], [4, 5]]        | 0x83019f0203ff820405               |
-// |                              |                                    |
-// | [_ 1, 2, 3, 4, 5, 6, 7, 8,   | 0x9f0102030405060708090a0b0c0d0e0f |
-// | 9, 10, 11, 12, 13, 14, 15,   | 101112131415161718181819ff         |
-// | 16, 17, 18, 19, 20, 21, 22,  |                                    |
-// | 23, 24, 25]                  |                                    |
-// |                              |                                    |
-// | {_ "a": 1, "b": [_ 2, 3]}    | 0xbf61610161629f0203ffff           |
-// |                              |                                    |
-// | ["a", {_ "b": "c"}]          | 0x826161bf61626163ff               |
-// |                              |                                    |
-// | {_ "Fun": true, "Amt": -2}   | 0xbf6346756ef563416d7421ff         |
-// +------------------------------+------------------------------------+
+    // serde doesn't support streaming bytes or strings
+    //
+    // indefinite_byte_string(b"5f42010243030405ff" => "(_ h'0102', h'030405')")
+    // indefinite_string(
+    //     b"7f657374726561646d696e67ff"
+    //     => r#"(_ "strea", "ming")"#)
+
+    // serde_cbor::Value doesn't support indefinite arrays or maps
+    //
+    // indefinite_empty_array(b"9fff" => "[_ ]")
+    // indefinite_array_with_indefinite_suffix(
+    //     b"9f018202039f0405ffff"
+    //     => "[_ 1, [2, 3], [_ 4, 5]]")
+    // indefinite_array_with_definite_suffix(
+    //     b"9f01820203820405ff"
+    //     => "[_ 1, [2, 3], [4, 5]]")
+    // definite_array_with_indefinite_suffix(
+    //     b"83018202039f0405ff"
+    //     => "[1, [2, 3], [_ 4, 5]]")
+    // definite_array_with_indefinite_middle(
+    //     b"83019f0203ff820405"
+    //     => "[1, [_ 2, 3], [4, 5]]")
+    // indefinite_array_large(
+    //     b"9f0102030405060708090a0b0c0d0e0f101112131415161718181819ff"
+    //     => "[_ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, \
+    //          18, 19, 20, 21, 22, 23, 24, 25]")
+    // indefinite_map_with_indefinite_array_suffix(
+    //     b"bf61610161629f0203ffff"
+    //     => r#"{_ "a": 1, "b": [_ 2, 3] }"#)
+    // definite_array_with_indefinite_map_suffix(
+    //     b"826161bf61626163ff"
+    //     => r#"["a", {_ "b": "c"}]"#)
+    // indefinite_map_with_heterogenous_values(
+    //     b"bf6346756ef563416d7421ff"
+    //     => r#"{_ "Fun": true, "Amt": -2 }"#)
+}
