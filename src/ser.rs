@@ -189,7 +189,8 @@ where
     }
 
     fn serialize_unit(self) -> Result<Self::Ok> {
-        unimplemented!()
+        self.writer.write_all(b"null")?;
+        Ok(())
     }
 
     fn serialize_unit_struct(self, _name: &'static str) -> Result<Self::Ok> {
@@ -239,8 +240,8 @@ where
         }
     }
 
-    fn serialize_tuple(self, _len: usize) -> Result<Self::SerializeTuple> {
-        unimplemented!()
+    fn serialize_tuple(self, len: usize) -> Result<Self::SerializeTuple> {
+        self.serialize_seq(Some(len))
     }
 
     fn serialize_tuple_struct(
@@ -332,16 +333,16 @@ where
     type Error = Error;
 
     #[inline]
-    fn serialize_element<T: ?Sized>(&mut self, _value: &T) -> Result<()>
+    fn serialize_element<T: ?Sized>(&mut self, value: &T) -> Result<()>
     where
         T: ser::Serialize,
     {
-        unimplemented!()
+        ser::SerializeSeq::serialize_element(self, value)
     }
 
     #[inline]
     fn end(self) -> Result<()> {
-        unimplemented!()
+        ser::SerializeSeq::end(self)
     }
 }
 

@@ -68,9 +68,9 @@ cbor2diag! {
         bool_false(b"f4", "false")
         bool_true(b"f5", "true")
 
-        // TODO serde_cbor::Value's handling of bare null and undefined seems off
+        null(b"f6", "null")
+        // serde doesn't support having an undefined type distinct from null
         //
-        // null(b"f6", "null")
         // undefined(b"f7", "undefined")
 
         // serde_cbor::Value doesn't support unassigned simple values
