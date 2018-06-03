@@ -39,6 +39,8 @@ macro_rules! serialize2diag {
 
     ($($name:ident { $($inner:tt)* })*) => { $(
         mod $name {
+            #[allow(unused_imports)]
+            use super::*;
             serialize2diag! {
                 $($inner)*
             }

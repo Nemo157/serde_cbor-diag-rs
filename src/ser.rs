@@ -236,7 +236,9 @@ where
             self.contexts.push(Context::Empty);
             Ok(self)
         } else {
-            unimplemented!()
+            self.writer.write_all(b"[_ ")?;
+            self.contexts.push(Context::Empty);
+            Ok(self)
         }
     }
 
