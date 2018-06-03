@@ -5,9 +5,7 @@ version = "0.1.0"
 
 [dependencies]
 dtoa = "0.4.2"
+hex = "0.3.2"
 itoa = "0.4.1"
 serde = "1.0.65"
 serde_cbor = "0.8.2"
-
-[dev-dependencies]
-hex = "0.3.2"

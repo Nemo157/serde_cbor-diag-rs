@@ -2,6 +2,7 @@ use std::io;
 use std::num::FpCategory;
 
 use dtoa;
+use hex;
 use itoa;
 use serde::ser::{self, Serialize};
 
@@ -45,8 +46,13 @@ where
     type SerializeStruct = Self;
     type SerializeStructVariant = Self;
 
-    fn serialize_bool(self, _value: bool) -> Result<Self::Ok> {
-        unimplemented!()
+    fn serialize_bool(self, value: bool) -> Result<Self::Ok> {
+        if value {
+            self.writer.write_all(b"true")?;
+        } else {
+            self.writer.write_all(b"false")?;
+        }
+        Ok(())
     }
 
     fn serialize_i8(self, _value: i8) -> Result<Self::Ok> {
@@ -122,12 +128,21 @@ where
         unimplemented!()
     }
 
-    fn serialize_str(self, _value: &str) -> Result<Self::Ok> {
-        unimplemented!()
+    fn serialize_str(self, value: &str) -> Result<Self::Ok> {
+        self.writer.write_all(b"\"")?;
+        for char in value.chars() {
+            let escaped: String = char.escape_default().collect();
+            self.writer.write_all(escaped.as_ref())?;
+        }
+        self.writer.write_all(b"\"")?;
+        Ok(())
     }
 
-    fn serialize_bytes(self, _value: &[u8]) -> Result<Self::Ok> {
-        unimplemented!()
+    fn serialize_bytes(self, value: &[u8]) -> Result<Self::Ok> {
+        self.writer.write_all(b"h'")?;
+        self.writer.write_all(hex::encode(value).as_ref())?;
+        self.writer.write_all(b"'")?;
+        Ok(())
     }
 
     fn serialize_none(self) -> Result<Self::Ok> {

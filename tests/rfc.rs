@@ -56,57 +56,46 @@ cbor2diag! {
     float_neg_infinity_half(b"f9fc00" => "-Infinity")
     float_neg_infinity_single(b"faff800000" => "-Infinity")
     float_neg_infinity_double(b"fbfff0000000000000" => "-Infinity")
+
+    bool_false(b"f4" => "false")
+    bool_true(b"f5" => "true")
+
+    // TODO serde_cbor::Value's handling of bare null and undefined seems off
+    // null(b"f6" => "null")
+    // undefined(b"f7" => "undefined")
+
+    // serde_cbor::Value doesn't support unassigned simple values
+    // simple_sixteen(b"f0" => "simple(16)")
+    // simple_twenty_fourc(b"f818" => "simple(24)")
+    // simple_two_hundred_fifty_five(b"f8ff" => "simple(255)")
+
+    // Note: serde doesn't have any way to support tagging of data, the tags
+    // that the RFC included on the following diagnostic notations have all been
+    // dropped.
+    tagged_date(b"c074323031332d30332d32315432303a30343a30305a" => r#""2013-03-21T20:04:00Z""#)
+    tagged_integer(b"c11a514b67b0" => "1363896240")
+    tagged_float(b"c1fb41d452d9ec200000" => "1363896240.5")
+    tagged_base16_bytes(b"d74401020304" => "h'01020304'")
+    tagged_encoded_cbor_item(b"d818456449455446" => "h'6449455446'")
+    tagged_url(b"d82076687474703a2f2f7777772e6578616d706c652e636f6d" => r#""http://www.example.com""#)
+
+    empty_byte_string(b"40" => "h''")
+    byte_string(b"4401020304" => "h'01020304'")
+    empty_string(b"60" => r#""""#)
+    string_a(b"6161" => r#""a""#)
+    string_ietf(b"6449455446" => r#""IETF""#)
+    string_quote_slash(b"62225c" => r#""\"\\""#)
+
+    // Note: This is using Rusts unicode escaping, this is quite different to
+    // the Javascript based escaping shown in the RFC.
+    string_unicode_latin_supplement(b"62c3bc" => r#""\u{fc}""#)
+    string_unicode_surrogate_pair(b"64f0908591" => r#""\u{10151}""#)
 }
 
 // Tests left to add:
 //
 // +------------------------------+------------------------------------+
 // | Diagnostic                   | Encoded                            |
-// |                              |                                    |
-// | false                        | 0xf4                               |
-// |                              |                                    |
-// | true                         | 0xf5                               |
-// |                              |                                    |
-// | null                         | 0xf6                               |
-// |                              |                                    |
-// | undefined                    | 0xf7                               |
-// |                              |                                    |
-// | simple(16)                   | 0xf0                               |
-// |                              |                                    |
-// | simple(24)                   | 0xf818                             |
-// |                              |                                    |
-// | simple(255)                  | 0xf8ff                             |
-// |                              |                                    |
-// | 0("2013-03-21T20:04:00Z")    | 0xc074323031332d30332d32315432303a |
-// |                              | 30343a30305a                       |
-// |                              |                                    |
-// | 1(1363896240)                | 0xc11a514b67b0                     |
-// |                              |                                    |
-// | 1(1363896240.5)              | 0xc1fb41d452d9ec200000             |
-// |                              |                                    |
-// | 23(h'01020304')              | 0xd74401020304                     |
-// |                              |                                    |
-// | 24(h'6449455446')            | 0xd818456449455446                 |
-// |                              |                                    |
-// | 32("http://www.example.com") | 0xd82076687474703a2f2f7777772e6578 |
-// |                              | 616d706c652e636f6d                 |
-// |                              |                                    |
-// | h''                          | 0x40                               |
-// |                              |                                    |
-// | h'01020304'                  | 0x4401020304                       |
-// |                              |                                    |
-// | ""                           | 0x60                               |
-// |                              |                                    |
-// | "a"                          | 0x6161                             |
-// |                              |                                    |
-// | "IETF"                       | 0x6449455446                       |
-// |                              |                                    |
-// | "\"\\"                       | 0x62225c                           |
-// |                              |                                    |
-// | "\u00fc"                     | 0x62c3bc                           |
-// |                              |                                    |
-// |                              |                                    |
-// | "\ud800\udd51"               | 0x64f0908591                       |
 // |                              |                                    |
 // | []                           | 0x80                               |
 // |                              |                                    |

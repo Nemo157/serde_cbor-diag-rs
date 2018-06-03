@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate serde;
 extern crate dtoa;
+extern crate hex;
 extern crate itoa;
 extern crate serde_cbor;
 
