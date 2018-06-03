@@ -17,3 +17,15 @@ macro_rules! cbor2diag {
         }
     )* }
 }
+
+#[macro_export]
+macro_rules! serialize2diag {
+    ($($name:ident($value:expr, $diag:expr))*) => { $(
+        #[test]
+        fn $name() {
+            use $crate::utils::serde_cbor_diag::to_string_pretty;
+            let diag = to_string_pretty(&$value).unwrap();
+            assert_eq!(diag, $diag);
+        }
+    )* }
+}

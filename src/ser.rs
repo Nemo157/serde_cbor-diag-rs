@@ -64,16 +64,19 @@ where
         Ok(())
     }
 
-    fn serialize_i8(self, _value: i8) -> Result<Self::Ok> {
-        unimplemented!()
+    fn serialize_i8(self, value: i8) -> Result<Self::Ok> {
+        itoa::write(&mut self.writer, value)?;
+        Ok(())
     }
 
-    fn serialize_i16(self, _value: i16) -> Result<Self::Ok> {
-        unimplemented!()
+    fn serialize_i16(self, value: i16) -> Result<Self::Ok> {
+        itoa::write(&mut self.writer, value)?;
+        Ok(())
     }
 
-    fn serialize_i32(self, _value: i32) -> Result<Self::Ok> {
-        unimplemented!()
+    fn serialize_i32(self, value: i32) -> Result<Self::Ok> {
+        itoa::write(&mut self.writer, value)?;
+        Ok(())
     }
 
     fn serialize_i64(self, value: i64) -> Result<Self::Ok> {
@@ -82,21 +85,25 @@ where
     }
 
     serde_if_integer128! {
-        fn serialize_i128(self, _value: i128) -> Result<Self::Ok> {
-            unimplemented!()
+        fn serialize_i128(self, value: i128) -> Result<Self::Ok> {
+            self.writer.write_all(value.to_string().as_ref())?;
+            Ok(())
         }
     }
 
-    fn serialize_u8(self, _value: u8) -> Result<Self::Ok> {
-        unimplemented!()
+    fn serialize_u8(self, value: u8) -> Result<Self::Ok> {
+        itoa::write(&mut self.writer, value)?;
+        Ok(())
     }
 
-    fn serialize_u16(self, _value: u16) -> Result<Self::Ok> {
-        unimplemented!()
+    fn serialize_u16(self, value: u16) -> Result<Self::Ok> {
+        itoa::write(&mut self.writer, value)?;
+        Ok(())
     }
 
-    fn serialize_u32(self, _value: u32) -> Result<Self::Ok> {
-        unimplemented!()
+    fn serialize_u32(self, value: u32) -> Result<Self::Ok> {
+        itoa::write(&mut self.writer, value)?;
+        Ok(())
     }
 
     fn serialize_u64(self, value: u64) -> Result<Self::Ok> {
@@ -105,8 +112,9 @@ where
     }
 
     serde_if_integer128! {
-        fn serialize_u128(self, _value: u128) -> Result<Self::Ok> {
-            unimplemented!()
+        fn serialize_u128(self, value: u128) -> Result<Self::Ok> {
+            self.writer.write_all(value.to_string().as_ref())?;
+            Ok(())
         }
     }
 
