@@ -77,11 +77,13 @@ cbor2diag! {
     tagged_float(b"c1fb41d452d9ec200000" => "1363896240.5")
     tagged_base16_bytes(b"d74401020304" => "h'01020304'")
     tagged_encoded_cbor_item(b"d818456449455446" => "h'6449455446'")
-    tagged_url(b"d82076687474703a2f2f7777772e6578616d706c652e636f6d" => r#""http://www.example.com""#)
+    tagged_url(
+        b"d82076687474703a2f2f7777772e6578616d706c652e636f6d"
+        => r#""http://www.example.com""#)
 
-    empty_byte_string(b"40" => "h''")
+    byte_string_empty(b"40" => "h''")
     byte_string(b"4401020304" => "h'01020304'")
-    empty_string(b"60" => r#""""#)
+    string_empty(b"60" => r#""""#)
     string_a(b"6161" => r#""a""#)
     string_ietf(b"6449455446" => r#""IETF""#)
     string_quote_slash(b"62225c" => r#""\"\\""#)
@@ -90,23 +92,20 @@ cbor2diag! {
     // the Javascript based escaping shown in the RFC.
     string_unicode_latin_supplement(b"62c3bc" => r#""\u{fc}""#)
     string_unicode_surrogate_pair(b"64f0908591" => r#""\u{10151}""#)
+
+    array_empty(b"80" => "[]")
+    array_integers(b"83010203" => "[1, 2, 3]")
+    array_heterogenous(b"8301820203820405" => "[1, [2, 3], [4, 5]]")
+    array_large(
+        b"98190102030405060708090a0b0c0d0e0f101112131415161718181819"
+        => "[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, \
+              19, 20, 21, 22, 23, 24, 25]")
 }
 
 // Tests left to add:
 //
 // +------------------------------+------------------------------------+
 // | Diagnostic                   | Encoded                            |
-// |                              |                                    |
-// | []                           | 0x80                               |
-// |                              |                                    |
-// | [1, 2, 3]                    | 0x83010203                         |
-// |                              |                                    |
-// | [1, [2, 3], [4, 5]]          | 0x8301820203820405                 |
-// |                              |                                    |
-// | [1, 2, 3, 4, 5, 6, 7, 8, 9,  | 0x98190102030405060708090a0b0c0d0e |
-// | 10, 11, 12, 13, 14, 15, 16,  | 0f101112131415161718181819         |
-// | 17, 18, 19, 20, 21, 22, 23,  |                                    |
-// | 24, 25]                      |                                    |
 // |                              |                                    |
 // | {}                           | 0xa0                               |
 // |                              |                                    |

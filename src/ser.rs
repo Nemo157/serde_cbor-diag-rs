@@ -8,9 +8,15 @@ use serde::ser::{self, Serialize};
 
 use {Error, Result};
 
+enum Context {
+    Empty,
+    NonEmpty,
+}
+
 /// A structure for serializing Rust values into CBOR diagnostic notation.
 pub struct Serializer<W> {
     writer: W,
+    contexts: Vec<Context>,
 }
 
 impl<'a, W> Serializer<W>
@@ -20,7 +26,10 @@ where
     /// Creates a new CBOR diagnostic notation pretty print serializer.
     #[inline]
     pub fn pretty(writer: W) -> Self {
-        Serializer { writer }
+        Serializer {
+            writer,
+            contexts: Vec::new(),
+        }
     }
 
     /// Unwrap the inner [`io::Write`](::std::io::Write) from the
@@ -197,8 +206,14 @@ where
         unimplemented!()
     }
 
-    fn serialize_seq(self, _len: Option<usize>) -> Result<Self::SerializeSeq> {
-        unimplemented!()
+    fn serialize_seq(self, len: Option<usize>) -> Result<Self::SerializeSeq> {
+        if len.is_some() {
+            self.writer.write_all(b"[")?;
+            self.contexts.push(Context::Empty);
+            Ok(self)
+        } else {
+            unimplemented!()
+        }
     }
 
     fn serialize_tuple(self, _len: usize) -> Result<Self::SerializeTuple> {
@@ -254,16 +269,29 @@ where
     type Error = Error;
 
     #[inline]
-    fn serialize_element<T: ?Sized>(&mut self, _value: &T) -> Result<()>
+    fn serialize_element<T: ?Sized>(&mut self, value: &T) -> Result<()>
     where
         T: ser::Serialize,
     {
-        unimplemented!()
+        let context = self.contexts.pop().expect("impossible");
+        match context {
+            Context::Empty => {
+                value.serialize(&mut **self)?;
+            }
+            Context::NonEmpty => {
+                self.writer.write_all(b", ")?;
+                value.serialize(&mut **self)?;
+            }
+        }
+        self.contexts.push(Context::NonEmpty);
+        Ok(())
     }
 
     #[inline]
     fn end(self) -> Result<()> {
-        unimplemented!()
+        self.contexts.pop().expect("impossible");
+        self.writer.write_all(b"]")?;
+        Ok(())
     }
 }
 
