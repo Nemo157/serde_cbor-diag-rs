@@ -26,38 +26,30 @@ cbor2diag! {
     neg_ten(b"29" => "-10")
     neg_one_hundred(b"3863" => "-100")
     neg_one_thousand(b"3903e7" => "-1000")
+
+    float_zero(b"f90000" => "0.0")
+    float_neg_zero(b"f98000" => "-0.0")
+    float_one(b"f93c00" => "1.0")
+    float_one_point_one(b"fb3ff199999999999a" => "1.1")
+    float_one_point_five(b"f93e00" => "1.5")
+    float_sixty_five_thousand_five_hundred_and_four(b"f97bff" => "65504.0")
+    float_one_hundred_thousand(b"fa47c35000" => "100000.0")
+
+    // `dtoa`'s exponential notation is slightly different to what is shown in
+    // the RFC, since this is not a real serialization format that's fine.
+    float_big(b"fa7f7fffff" => "3.4028234663852887e38")
+    float_one_e_300(b"fb7e37e43c8800759c" => "1e300")
+    float_tiny(b"f90001" => "5.960464477539063e-8")
+    float_small(b"f90400" => "0.00006103515625")
+
+    float_neg_four(b"f9c400" => "-4.0")
+    float_neg_four_point_one(b"fbc010666666666666" => "-4.1")
 }
 
 // Tests left to add:
 //
 // +------------------------------+------------------------------------+
 // | Diagnostic                   | Encoded                            |
-// | 0.0                          | 0xf90000                           |
-// |                              |                                    |
-// | -0.0                         | 0xf98000                           |
-// |                              |                                    |
-// | 1.0                          | 0xf93c00                           |
-// |                              |                                    |
-// | 1.1                          | 0xfb3ff199999999999a               |
-// |                              |                                    |
-// | 1.5                          | 0xf93e00                           |
-// |                              |                                    |
-// | 65504.0                      | 0xf97bff                           |
-// |                              |                                    |
-// | 100000.0                     | 0xfa47c35000                       |
-// |                              |                                    |
-// | 3.4028234663852886e+38       | 0xfa7f7fffff                       |
-// |                              |                                    |
-// | 1.0e+300                     | 0xfb7e37e43c8800759c               |
-// |                              |                                    |
-// | 5.960464477539063e-8         | 0xf90001                           |
-// |                              |                                    |
-// | 0.00006103515625             | 0xf90400                           |
-// |                              |                                    |
-// | -4.0                         | 0xf9c400                           |
-// |                              |                                    |
-// | -4.1                         | 0xfbc010666666666666               |
-// |                              |                                    |
 // | Infinity                     | 0xf97c00                           |
 // |                              |                                    |
 // | NaN                          | 0xf97e00                           |

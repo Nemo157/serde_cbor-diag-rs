@@ -1,5 +1,6 @@
 use std::io;
 
+use dtoa;
 use itoa;
 use serde::ser::{self, Serialize};
 
@@ -97,8 +98,9 @@ where
         unimplemented!()
     }
 
-    fn serialize_f64(self, _value: f64) -> Result<Self::Ok> {
-        unimplemented!()
+    fn serialize_f64(self, value: f64) -> Result<Self::Ok> {
+        dtoa::write(&mut self.writer, value)?;
+        Ok(())
     }
 
     fn serialize_char(self, _value: char) -> Result<Self::Ok> {
