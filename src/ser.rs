@@ -118,8 +118,23 @@ where
         }
     }
 
-    fn serialize_f32(self, _value: f32) -> Result<Self::Ok> {
-        unimplemented!()
+    fn serialize_f32(self, value: f32) -> Result<Self::Ok> {
+        match value.classify() {
+            FpCategory::Infinite => {
+                if value.is_sign_positive() {
+                    self.writer.write_all(b"Infinity")?;
+                } else {
+                    self.writer.write_all(b"-Infinity")?;
+                }
+            }
+            FpCategory::Nan => {
+                self.writer.write_all(b"NaN")?;
+            }
+            FpCategory::Zero | FpCategory::Normal | FpCategory::Subnormal => {
+                dtoa::write(&mut self.writer, value)?;
+            }
+        }
+        Ok(())
     }
 
     fn serialize_f64(self, value: f64) -> Result<Self::Ok> {
