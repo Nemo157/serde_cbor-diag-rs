@@ -336,10 +336,15 @@ where
         self,
         _name: &'static str,
         _variant_index: u32,
-        _variant: &'static str,
-        _len: usize,
+        variant: &'static str,
+        len: usize,
     ) -> Result<Self::SerializeTupleVariant> {
-        unimplemented!()
+        {
+            use serde::ser::SerializeMap;
+            let mut map = self.serialize_map(Some(1))?;
+            map.serialize_key(variant)?;
+        }
+        self.serialize_seq(Some(len))
     }
 
     fn serialize_map(self, len: Option<usize>) -> Result<Self::SerializeMap> {
@@ -446,16 +451,18 @@ where
     type Error = Error;
 
     #[inline]
-    fn serialize_field<T: ?Sized>(&mut self, _value: &T) -> Result<()>
+    fn serialize_field<T: ?Sized>(&mut self, value: &T) -> Result<()>
     where
         T: ser::Serialize,
     {
-        unimplemented!()
+        ser::SerializeSeq::serialize_element(self, value)
     }
 
     #[inline]
     fn end(self) -> Result<()> {
-        unimplemented!()
+        ser::SerializeSeq::end(&mut *self)?;
+        ser::SerializeMap::end(&mut *self)?;
+        Ok(())
     }
 }
 
@@ -478,6 +485,7 @@ where
             self.writer.write_all(b" ")?;
         }
         key.serialize(&mut **self)?;
+        self.writer.write_all(b": ")?;
         Ok(())
     }
 
@@ -486,7 +494,6 @@ where
     where
         T: ser::Serialize,
     {
-        self.writer.write_all(b": ")?;
         value.serialize(&mut **self)?;
         Ok(())
     }
