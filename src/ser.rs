@@ -1,5 +1,6 @@
 use std::io;
 
+use itoa;
 use serde::ser::{self, Serialize};
 
 use {Error, Result};
@@ -80,8 +81,9 @@ where
         unimplemented!()
     }
 
-    fn serialize_u64(self, _value: u64) -> Result<Self::Ok> {
-        unimplemented!()
+    fn serialize_u64(self, value: u64) -> Result<Self::Ok> {
+        itoa::write(&mut self.writer, value)?;
+        Ok(())
     }
 
     serde_if_integer128! {
