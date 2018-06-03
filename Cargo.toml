@@ -1,6 +1,6 @@
 [package]
 authors = ["Wim Looman <wim@nemo157.com>"]
-name = "serde-cbor-diag"
+name = "serde_cbor-diag"
 version = "0.1.0"
 
 [dependencies]

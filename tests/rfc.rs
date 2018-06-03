@@ -18,7 +18,7 @@ cbor2diag! {
         u64_max(b"1bffffffffffffffff", "18446744073709551615")
 
         // serde_cbor::Value returns bignums as their byte string, without tags
-        // there's no way for serde-cbor-diag to know to encode as an integer
+        // there's no way for serde_cbor-diag to know to encode as an integer
         //
         // u64_max_plus_one(b"c249010000000000000000", "18446744073709551616")
 
