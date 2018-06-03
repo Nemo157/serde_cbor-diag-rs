@@ -47,9 +47,13 @@ serialize2diag! {
     }
 }
 
-impl<T> ser::Serialize for Indefinite<T> where T: ser::Serialize {
+impl<T> ser::Serialize for Indefinite<T>
+where
+    T: ser::Serialize,
+{
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where S: ser::Serializer
+    where
+        S: ser::Serializer,
     {
         let mut seq = serializer.serialize_seq(None)?;
         for value in &self.0 {
