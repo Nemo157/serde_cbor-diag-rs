@@ -28,13 +28,24 @@ macro_rules! cbor2diag {
 
 #[macro_export]
 macro_rules! serialize2diag {
-    ($($name:ident($value:expr, $diag:expr))*) => { $(
+    ($($name:ident$( + $name_cbor:ident)*($value:expr, $diag:expr))*) => { $(
         #[test]
         fn $name() {
             use $crate::utils::serde_cbor_diag::to_string_pretty;
             let diag = to_string_pretty(&$value).unwrap();
             assert_eq!(diag, $diag);
         }
+
+        $(
+            #[test]
+            fn $name_cbor() {
+                use $crate::utils::serde_cbor::to_value;
+                use $crate::utils::serde_cbor_diag::to_string_pretty;
+                let value = to_value(&$value).unwrap();
+                let diag = to_string_pretty(&value).unwrap();
+                assert_eq!(diag, $diag);
+            }
+        )*
     )* };
 
     ($($name:ident { $($inner:tt)* })*) => { $(

@@ -13,24 +13,24 @@ struct NewtypeStruct<T>(T);
 
 serialize2diag! {
     bool {
-        true_(true, "true")
-        false_(false, "false")
+        true_ + true_cbor(true, "true")
+        false_ + false_cbor(false, "false")
     }
 
     char {
-        a('a', r#""a""#)
-        space(' ', r#"" ""#)
-        tab('\t', r#""\t""#)
-        unicode_surrogate_pair('\u{10151}', r#""\u{10151}""#)
+        a + a_cbor('a', r#""a""#)
+        space + space_cbor(' ', r#"" ""#)
+        tab + tab_cbor('\t', r#""\t""#)
+        unicode + unicode_cbor('\u{10151}', r#""\u{10151}""#)
     }
 
     option {
-        some(Some(5), "5")
-        none({ let v: Option<i32> = None; v }, "null")
+        some + some_cbor(Some(5), "5")
+        none + none_cbor({ let v: Option<i32> = None; v }, "null")
     }
 
     structs {
-        unit(UnitStruct, "null")
-        newtype(NewtypeStruct(5), "5")
+        unit + unit_cbor(UnitStruct, "null")
+        newtype + newtype_cbor(NewtypeStruct(5), "5")
     }
 }

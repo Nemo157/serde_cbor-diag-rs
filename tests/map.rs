@@ -13,9 +13,13 @@ struct Indefinite<K, V>(BTreeMap<K, V>);
 
 serialize2diag! {
     map {
-        empty({ let v: BTreeMap<(), ()> = btreemap!{ }; v }, "{ }")
-        integers(btreemap!{ 1 => 2, 3 => 4 }, "{ 1: 2, 3: 4 }")
-        strings(
+        empty + empty_cbor(
+            { let v: BTreeMap<(), ()> = btreemap!{ }; v },
+            "{ }")
+        integers + integers_cbor(
+            btreemap!{ 1 => 2, 3 => 4 },
+            "{ 1: 2, 3: 4 }")
+        strings + strings_cbor(
             btreemap!{ "a" => "A", "b" => "B" },
             r#"{ "a": "A", "b": "B" }"#)
     }
