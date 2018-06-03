@@ -9,3 +9,7 @@ hex = "0.3.2"
 itoa = "0.4.1"
 serde = "1.0.65"
 serde_cbor = "0.8.2"
+
+[dev-dependencies.bytes]
+version = "0.4.8"
+features = ["serde"]
