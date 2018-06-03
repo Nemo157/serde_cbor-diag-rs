@@ -6,10 +6,16 @@ extern crate serde_derive;
 mod utils;
 
 #[derive(Serialize)]
-struct UnitStruct;
+struct Unit;
 
 #[derive(Serialize)]
-struct NewtypeStruct<T>(T);
+struct Newtype<T>(T);
+
+#[derive(Serialize)]
+enum Enum<T> {
+    Unit,
+    Newtype(T),
+}
 
 serialize2diag! {
     bool {
@@ -30,7 +36,12 @@ serialize2diag! {
     }
 
     structs {
-        unit + unit_cbor(UnitStruct, "null")
-        newtype + newtype_cbor(NewtypeStruct(5), "5")
+        unit + unit_cbor(Unit, "null")
+        newtype + newtype_cbor(Newtype(5), "5")
+    }
+
+    enums {
+        unit + unit_cbor({ let v: Enum<()> = Enum::Unit; v }, r#""Unit""#)
+        newtype + newtype_cbor(Enum::Newtype(5), r#"{ "Newtype": 5 }"#)
     }
 }

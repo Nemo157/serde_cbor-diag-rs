@@ -203,9 +203,10 @@ where
         self,
         _name: &'static str,
         _variant_index: u32,
-        _variant: &'static str,
+        variant: &'static str,
     ) -> Result<Self::Ok> {
-        unimplemented!()
+        self.serialize_str(variant)?;
+        Ok(())
     }
 
     fn serialize_newtype_struct<T: ?Sized>(
@@ -223,13 +224,18 @@ where
         self,
         _name: &'static str,
         _variant_index: u32,
-        _variant: &'static str,
-        _value: &T,
+        variant: &'static str,
+        value: &T,
     ) -> Result<Self::Ok>
     where
         T: Serialize,
     {
-        unimplemented!()
+        use serde::ser::SerializeMap;
+        let mut map = self.serialize_map(Some(1))?;
+        map.serialize_key(variant)?;
+        map.serialize_value(value)?;
+        map.end()?;
+        Ok(())
     }
 
     fn serialize_seq(self, len: Option<usize>) -> Result<Self::SerializeSeq> {
