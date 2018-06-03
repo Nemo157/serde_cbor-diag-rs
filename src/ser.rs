@@ -59,8 +59,9 @@ where
         unimplemented!()
     }
 
-    fn serialize_i64(self, _value: i64) -> Result<Self::Ok> {
-        unimplemented!()
+    fn serialize_i64(self, value: i64) -> Result<Self::Ok> {
+        itoa::write(&mut self.writer, value)?;
+        Ok(())
     }
 
     serde_if_integer128! {
