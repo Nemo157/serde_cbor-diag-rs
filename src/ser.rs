@@ -238,8 +238,14 @@ where
         unimplemented!()
     }
 
-    fn serialize_map(self, _len: Option<usize>) -> Result<Self::SerializeMap> {
-        unimplemented!()
+    fn serialize_map(self, len: Option<usize>) -> Result<Self::SerializeMap> {
+        if len.is_some() {
+            self.writer.write_all(b"{")?;
+            self.contexts.push(Context::Empty);
+            Ok(self)
+        } else {
+            unimplemented!()
+        }
     }
 
     fn serialize_struct(
@@ -366,24 +372,40 @@ where
     type Error = Error;
 
     #[inline]
-    fn serialize_key<T: ?Sized>(&mut self, _key: &T) -> Result<()>
+    fn serialize_key<T: ?Sized>(&mut self, key: &T) -> Result<()>
     where
         T: ser::Serialize,
     {
-        unimplemented!()
+        let context = self.contexts.pop().expect("impossible");
+        match context {
+            Context::Empty => {
+                self.writer.write_all(b" ")?;
+                key.serialize(&mut **self)?;
+            }
+            Context::NonEmpty => {
+                self.writer.write_all(b", ")?;
+                key.serialize(&mut **self)?;
+            }
+        }
+        self.contexts.push(Context::NonEmpty);
+        Ok(())
     }
 
     #[inline]
-    fn serialize_value<T: ?Sized>(&mut self, _value: &T) -> Result<()>
+    fn serialize_value<T: ?Sized>(&mut self, value: &T) -> Result<()>
     where
         T: ser::Serialize,
     {
-        unimplemented!()
+        self.writer.write_all(b": ")?;
+        value.serialize(&mut **self)?;
+        Ok(())
     }
 
     #[inline]
     fn end(self) -> Result<()> {
-        unimplemented!()
+        self.contexts.pop().expect("impossible");
+        self.writer.write_all(b" }")?;
+        Ok(())
     }
 }
 
