@@ -358,19 +358,24 @@ where
     fn serialize_struct(
         self,
         _name: &'static str,
-        _len: usize,
+        len: usize,
     ) -> Result<Self::SerializeStruct> {
-        unimplemented!()
+        self.serialize_map(Some(len))
     }
 
     fn serialize_struct_variant(
         self,
         _name: &'static str,
         _variant_index: u32,
-        _variant: &'static str,
-        _len: usize,
+        variant: &'static str,
+        len: usize,
     ) -> Result<Self::SerializeStructVariant> {
-        unimplemented!()
+        {
+            use serde::ser::SerializeMap;
+            let mut map = self.serialize_map(Some(1))?;
+            map.serialize_key(variant)?;
+        }
+        self.serialize_map(Some(len))
     }
 }
 
@@ -515,18 +520,20 @@ where
     #[inline]
     fn serialize_field<T: ?Sized>(
         &mut self,
-        _key: &'static str,
-        _value: &T,
+        key: &'static str,
+        value: &T,
     ) -> Result<()>
     where
         T: ser::Serialize,
     {
-        unimplemented!()
+        ser::SerializeMap::serialize_key(self, key)?;
+        ser::SerializeMap::serialize_value(self, value)?;
+        Ok(())
     }
 
     #[inline]
     fn end(self) -> Result<()> {
-        unimplemented!()
+        ser::SerializeMap::end(&mut *self)
     }
 }
 
@@ -540,18 +547,22 @@ where
     #[inline]
     fn serialize_field<T: ?Sized>(
         &mut self,
-        _key: &'static str,
-        _value: &T,
+        key: &'static str,
+        value: &T,
     ) -> Result<()>
     where
         T: ser::Serialize,
     {
-        unimplemented!()
+        ser::SerializeMap::serialize_key(self, key)?;
+        ser::SerializeMap::serialize_value(self, value)?;
+        Ok(())
     }
 
     #[inline]
     fn end(self) -> Result<()> {
-        unimplemented!()
+        ser::SerializeMap::end(&mut *self)?;
+        ser::SerializeMap::end(&mut *self)?;
+        Ok(())
     }
 }
 
