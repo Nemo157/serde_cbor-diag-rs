@@ -156,8 +156,10 @@ where
         Ok(())
     }
 
-    fn serialize_char(self, _value: char) -> Result<Self::Ok> {
-        unimplemented!()
+    fn serialize_char(self, value: char) -> Result<Self::Ok> {
+        // A char encoded as UTF-8 takes 4 bytes at most.
+        let mut buf = [0; 4];
+        self.serialize_str(value.encode_utf8(&mut buf))
     }
 
     fn serialize_str(self, value: &str) -> Result<Self::Ok> {
@@ -178,19 +180,19 @@ where
     }
 
     fn serialize_none(self) -> Result<Self::Ok> {
-        unimplemented!()
+        self.writer.write_all(b"null")?;
+        Ok(())
     }
 
-    fn serialize_some<T: ?Sized>(self, _value: &T) -> Result<Self::Ok>
+    fn serialize_some<T: ?Sized>(self, value: &T) -> Result<Self::Ok>
     where
         T: Serialize,
     {
-        unimplemented!()
+        value.serialize(self)
     }
 
     fn serialize_unit(self) -> Result<Self::Ok> {
-        self.writer.write_all(b"null")?;
-        Ok(())
+        self.serialize_none()
     }
 
     fn serialize_unit_struct(self, _name: &'static str) -> Result<Self::Ok> {
