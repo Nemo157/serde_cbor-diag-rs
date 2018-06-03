@@ -1,44 +1,19 @@
 #[macro_use]
 mod utils;
 
-serialize2diag! {
-    i8 {
-        zero(0i8, "0")
-    }
+macro_rules! integers {
+    ($($ty:ident),*) => {
+        serialize2diag! { $(
+            $ty {
+                zero(0 as $ty, "0")
+                twenty_three(23 as $ty, "23")
+                min($ty::min_value(), $ty::min_value().to_string())
+                max($ty::max_value(), $ty::max_value().to_string())
+            }
+        )* }
+    };
+}
 
-    i16 {
-        zero(0i16, "0")
-    }
-
-    i32 {
-        zero(0i32, "0")
-    }
-
-    i64 {
-        zero(0i64, "0")
-    }
-
-    i128 {
-        zero(0i128, "0")
-    }
-
-    u8 {
-        zero(0u8, "0")
-    }
-
-    u16 {
-        zero(0u16, "0")
-    }
-
-    u32 {
-        zero(0u32, "0")
-    }
-
-    u64 {
-        zero(0u64, "0")
-    }
-
-    u128 {
-        zero(0u128, "0")
-    }
+integers! {
+    i8, i16, i32, i64, i128, u8, u16, u32, u64, u128
 }

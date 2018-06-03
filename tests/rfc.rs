@@ -17,7 +17,8 @@ cbor2diag! {
         one_long_billion(b"1b000000e8d4a51000", "1000000000000")
         u64_max(b"1bffffffffffffffff", "18446744073709551615")
 
-        // u128 is not supported by serde_cbor::Value
+        // serde_cbor::Value returns bignums as their byte string, without tags
+        // there's no way for serde-cbor-diag to know to encode as an integer
         //
         // u64_max_plus_one(b"c249010000000000000000", "18446744073709551616")
 
