@@ -44,28 +44,24 @@ cbor2diag! {
 
     float_neg_four(b"f9c400" => "-4.0")
     float_neg_four_point_one(b"fbc010666666666666" => "-4.1")
+
+    float_infinity_half(b"f97c00" => "Infinity")
+    float_infinity_single(b"fa7f800000" => "Infinity")
+    float_infinity_double(b"fb7ff0000000000000" => "Infinity")
+
+    float_nan_half(b"f97e00" => "NaN")
+    float_nan_single(b"fa7fc00000" => "NaN")
+    float_nan_double(b"fb7ff8000000000000" => "NaN")
+
+    float_neg_infinity_half(b"f9fc00" => "-Infinity")
+    float_neg_infinity_single(b"faff800000" => "-Infinity")
+    float_neg_infinity_double(b"fbfff0000000000000" => "-Infinity")
 }
 
 // Tests left to add:
 //
 // +------------------------------+------------------------------------+
 // | Diagnostic                   | Encoded                            |
-// | Infinity                     | 0xf97c00                           |
-// |                              |                                    |
-// | NaN                          | 0xf97e00                           |
-// |                              |                                    |
-// | -Infinity                    | 0xf9fc00                           |
-// |                              |                                    |
-// | Infinity                     | 0xfa7f800000                       |
-// |                              |                                    |
-// | NaN                          | 0xfa7fc00000                       |
-// |                              |                                    |
-// | -Infinity                    | 0xfaff800000                       |
-// |                              |                                    |
-// |                              |                                    |
-// | NaN                          | 0xfb7ff8000000000000               |
-// |                              |                                    |
-// | -Infinity                    | 0xfbfff0000000000000               |
 // |                              |                                    |
 // | false                        | 0xf4                               |
 // |                              |                                    |

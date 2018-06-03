@@ -1,4 +1,5 @@
 use std::io;
+use std::num::FpCategory;
 
 use dtoa;
 use itoa;
@@ -99,7 +100,21 @@ where
     }
 
     fn serialize_f64(self, value: f64) -> Result<Self::Ok> {
-        dtoa::write(&mut self.writer, value)?;
+        match value.classify() {
+            FpCategory::Infinite => {
+                if value.is_sign_positive() {
+                    self.writer.write_all(b"Infinity")?;
+                } else {
+                    self.writer.write_all(b"-Infinity")?;
+                }
+            }
+            FpCategory::Nan => {
+                self.writer.write_all(b"NaN")?;
+            }
+            FpCategory::Zero | FpCategory::Normal | FpCategory::Subnormal => {
+                dtoa::write(&mut self.writer, value)?;
+            }
+        }
         Ok(())
     }
 
