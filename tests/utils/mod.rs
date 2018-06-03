@@ -15,7 +15,15 @@ macro_rules! cbor2diag {
             let diag = to_string_pretty(&value).unwrap();
             assert_eq!(diag, $diag);
         }
-    )* }
+    )* };
+
+    ($($name:ident { $($inner:tt)* })*) => { $(
+        mod $name {
+            cbor2diag! {
+                $($inner)*
+            }
+        }
+    )* };
 }
 
 #[macro_export]
@@ -27,5 +35,13 @@ macro_rules! serialize2diag {
             let diag = to_string_pretty(&$value).unwrap();
             assert_eq!(diag, $diag);
         }
-    )* }
+    )* };
+
+    ($($name:ident { $($inner:tt)* })*) => { $(
+        mod $name {
+            serialize2diag! {
+                $($inner)*
+            }
+        }
+    )* };
 }
