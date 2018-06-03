@@ -9,8 +9,8 @@ use serde::ser::{self, Serialize};
 use {Error, Result};
 
 enum Context {
-    Empty,
-    NonEmpty,
+    Seq { indefinite: bool, seen_value: bool },
+    Map { indefinite: bool, seen_value: bool },
 }
 
 /// A structure for serializing Rust values into CBOR diagnostic notation.
@@ -19,7 +19,7 @@ pub struct Serializer<W> {
     contexts: Vec<Context>,
 }
 
-impl<'a, W> Serializer<W>
+impl<W> Serializer<W>
 where
     W: io::Write,
 {
@@ -37,6 +37,80 @@ where
     #[inline]
     pub fn into_inner(self) -> W {
         self.writer
+    }
+
+    fn push_context(&mut self, context: Context) -> Result<()> {
+        match &context {
+            Context::Seq {
+                indefinite: true, ..
+            } => {
+                self.writer.write_all(b"[_ ")?;
+            }
+            Context::Seq {
+                indefinite: false, ..
+            } => {
+                self.writer.write_all(b"[")?;
+            }
+            Context::Map {
+                indefinite: true, ..
+            } => {
+                self.writer.write_all(b"{_")?;
+            }
+            Context::Map {
+                indefinite: false, ..
+            } => {
+                self.writer.write_all(b"{")?;
+            }
+        }
+        self.contexts.push(context);
+        Ok(())
+    }
+
+    fn seen_value(&mut self) -> Result<bool> {
+        let context = self.contexts.last_mut().ok_or_else(|| {
+            Error::Custom(
+                "missing context when serializing a seq/map value".into(),
+            )
+        })?;
+        match context {
+            Context::Seq { seen_value, .. } => {
+                let old_value = *seen_value;
+                *seen_value = true;
+                Ok(old_value)
+            }
+            Context::Map { seen_value, .. } => {
+                let old_value = *seen_value;
+                *seen_value = true;
+                Ok(old_value)
+            }
+        }
+    }
+
+    fn pop_context(&mut self) -> Result<()> {
+        let context = self.contexts.pop().ok_or_else(|| {
+            Error::Custom(
+                "missing context when finishing a seq/map value".into(),
+            )
+        })?;
+        match context {
+            Context::Seq { .. } => {
+                self.writer.write_all(b"]")?;
+            }
+            Context::Map { .. } => {
+                self.writer.write_all(b" }")?;
+            }
+        }
+        Ok(())
+    }
+
+    fn check_done(&mut self) -> Result<()> {
+        if self.contexts.is_empty() {
+            Ok(())
+        } else {
+            Err(Error::Custom(
+                "Context remaining when done serializing".into(),
+            ))
+        }
     }
 }
 
@@ -239,15 +313,11 @@ where
     }
 
     fn serialize_seq(self, len: Option<usize>) -> Result<Self::SerializeSeq> {
-        if len.is_some() {
-            self.writer.write_all(b"[")?;
-            self.contexts.push(Context::Empty);
-            Ok(self)
-        } else {
-            self.writer.write_all(b"[_ ")?;
-            self.contexts.push(Context::Empty);
-            Ok(self)
-        }
+        self.push_context(Context::Seq {
+            indefinite: len.is_none(),
+            seen_value: false,
+        })?;
+        Ok(self)
     }
 
     fn serialize_tuple(self, len: usize) -> Result<Self::SerializeTuple> {
@@ -273,15 +343,11 @@ where
     }
 
     fn serialize_map(self, len: Option<usize>) -> Result<Self::SerializeMap> {
-        if len.is_some() {
-            self.writer.write_all(b"{")?;
-            self.contexts.push(Context::Empty);
-            Ok(self)
-        } else {
-            self.writer.write_all(b"{_")?;
-            self.contexts.push(Context::Empty);
-            Ok(self)
-        }
+        self.push_context(Context::Map {
+            indefinite: len.is_none(),
+            seen_value: false,
+        })?;
+        Ok(self)
     }
 
     fn serialize_struct(
@@ -315,24 +381,17 @@ where
     where
         T: ser::Serialize,
     {
-        let context = self.contexts.pop().expect("impossible");
-        match context {
-            Context::Empty => {
-                value.serialize(&mut **self)?;
-            }
-            Context::NonEmpty => {
-                self.writer.write_all(b", ")?;
-                value.serialize(&mut **self)?;
-            }
+        let seen_value = self.seen_value()?;
+        if seen_value {
+            self.writer.write_all(b", ")?;
         }
-        self.contexts.push(Context::NonEmpty);
+        value.serialize(&mut **self)?;
         Ok(())
     }
 
     #[inline]
     fn end(self) -> Result<()> {
-        self.contexts.pop().expect("impossible");
-        self.writer.write_all(b"]")?;
+        self.pop_context()?;
         Ok(())
     }
 }
@@ -412,18 +471,13 @@ where
     where
         T: ser::Serialize,
     {
-        let context = self.contexts.pop().expect("impossible");
-        match context {
-            Context::Empty => {
-                self.writer.write_all(b" ")?;
-                key.serialize(&mut **self)?;
-            }
-            Context::NonEmpty => {
-                self.writer.write_all(b", ")?;
-                key.serialize(&mut **self)?;
-            }
+        let seen_value = self.seen_value()?;
+        if seen_value {
+            self.writer.write_all(b", ")?;
+        } else {
+            self.writer.write_all(b" ")?;
         }
-        self.contexts.push(Context::NonEmpty);
+        key.serialize(&mut **self)?;
         Ok(())
     }
 
@@ -439,8 +493,7 @@ where
 
     #[inline]
     fn end(self) -> Result<()> {
-        self.contexts.pop().expect("impossible");
-        self.writer.write_all(b" }")?;
+        self.pop_context()?;
         Ok(())
     }
 }
@@ -510,6 +563,7 @@ where
 {
     let mut ser = Serializer::pretty(writer);
     value.serialize(&mut ser)?;
+    ser.check_done()?;
     Ok(())
 }
 
