@@ -4,7 +4,7 @@ pub extern crate serde_cbor_diag;
 
 #[macro_export]
 macro_rules! cbor2diag {
-    ($($name:ident($cbor:expr => $diag:expr))*) => { $(
+    ($($name:ident($cbor:expr, $diag:expr))*) => { $(
         #[test]
         fn $name() {
             use $crate::utils::hex::decode;
