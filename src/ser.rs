@@ -257,9 +257,9 @@ where
     fn serialize_tuple_struct(
         self,
         _name: &'static str,
-        _len: usize,
+        len: usize,
     ) -> Result<Self::SerializeTupleStruct> {
-        unimplemented!()
+        self.serialize_seq(Some(len))
     }
 
     fn serialize_tuple_variant(
@@ -366,16 +366,16 @@ where
     type Error = Error;
 
     #[inline]
-    fn serialize_field<T: ?Sized>(&mut self, _value: &T) -> Result<()>
+    fn serialize_field<T: ?Sized>(&mut self, value: &T) -> Result<()>
     where
         T: ser::Serialize,
     {
-        unimplemented!()
+        ser::SerializeSeq::serialize_element(self, value)
     }
 
     #[inline]
     fn end(self) -> Result<()> {
-        unimplemented!()
+        ser::SerializeSeq::end(self)
     }
 }
 

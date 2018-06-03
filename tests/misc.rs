@@ -12,9 +12,13 @@ struct Unit;
 struct Newtype<T>(T);
 
 #[derive(Serialize)]
+struct Tuple<T>(T, T);
+
+#[derive(Serialize)]
 enum Enum<T> {
     Unit,
     Newtype(T),
+    // Tuple(T, T)
 }
 
 serialize2diag! {
@@ -38,10 +42,12 @@ serialize2diag! {
     structs {
         unit + unit_cbor(Unit, "null")
         newtype + newtype_cbor(Newtype(5), "5")
+        tuple + tuple_cbor(Tuple(5, 6), "[5, 6]")
     }
 
     enums {
         unit + unit_cbor({ let v: Enum<()> = Enum::Unit; v }, r#""Unit""#)
         newtype + newtype_cbor(Enum::Newtype(5), r#"{ "Newtype": 5 }"#)
+        // tuple + tuple_cbor(Enum::Tuple(5, 6), r#"{ "Tuple": [5, 6] }"#)
     }
 }
