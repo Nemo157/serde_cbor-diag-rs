@@ -196,7 +196,7 @@ where
     }
 
     fn serialize_unit_struct(self, _name: &'static str) -> Result<Self::Ok> {
-        unimplemented!()
+        self.serialize_unit()
     }
 
     fn serialize_unit_variant(
@@ -211,12 +211,12 @@ where
     fn serialize_newtype_struct<T: ?Sized>(
         self,
         _name: &'static str,
-        _value: &T,
+        value: &T,
     ) -> Result<Self::Ok>
     where
         T: Serialize,
     {
-        unimplemented!()
+        value.serialize(self)
     }
 
     fn serialize_newtype_variant<T: ?Sized>(

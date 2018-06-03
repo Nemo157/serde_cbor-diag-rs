@@ -1,5 +1,15 @@
+extern crate serde;
+#[macro_use]
+extern crate serde_derive;
+
 #[macro_use]
 mod utils;
+
+#[derive(Serialize)]
+struct UnitStruct;
+
+#[derive(Serialize)]
+struct NewtypeStruct<T>(T);
 
 serialize2diag! {
     bool {
@@ -17,5 +27,10 @@ serialize2diag! {
     option {
         some(Some(5), "5")
         none({ let v: Option<i32> = None; v }, "null")
+    }
+
+    structs {
+        unit(UnitStruct, "null")
+        newtype(NewtypeStruct(5), "5")
     }
 }
